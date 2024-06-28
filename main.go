@@ -2,9 +2,12 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"strings"
+
 	// "os/signal"
 	// "syscall"
 
@@ -13,6 +16,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
+
+var db *sql.DB
 
 type Quote struct {
 	ID     int
@@ -24,7 +29,6 @@ type Quote struct {
 func main() {
 	log.Println("Starting up the application...")
 
-	var db *sql.DB
 	var err error
 
 	err = godotenv.Load()
@@ -80,7 +84,10 @@ func main() {
 	if err != nil {
 		log.Printf("error getting quote: %v", err)
 	} else {
-		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
+		author := quote.Author
+		author = strings.TrimSuffix(author, ", type.fit")
+
+		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, author))
 		if err != nil {
 			log.Printf("error sending message: %v", err)
 		} else {
@@ -92,15 +99,43 @@ func main() {
 }
 
 func fetchAndStoreQuotes() error {
+	client := resty.New()
+	resp, err := client.R().Get("https://type.fit/api/quotes")
+	if err != nil {
+		return err
+	}
+
+	var quotes []Quote
+	err = json.Unmarshal(resp.Body(), &quotes)
+	if err != nil {
+		return err
+	}
+
+	for _, quote := range quotes {
+		_, err := db.Exec("INSERT INTO quotes (text, author, posted) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE text=text", quote.Text, quote.Author, false)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
 func getUnpostedQuote() (Quote, error) {
 	var quote Quote
-
+	query := "SELECT id, text, author, posted FROM quotes WHERE posted = FALSE ORDER BY RAND() LIMIT 1"
+	row := db.QueryRow(query)
+	err := row.Scan(&quote.ID, &quote.Text, &quote.Author, &quote.Posted)
+	if err != nil {
+		return quote, err
+	}
 	return quote, nil
 }
 
 func markQuoteAsPosted(id int) {
-
+	query := "UPDATE quotes SET posted = TRUE WHERE id = ?"
+	_, err := db.Exec(query, id)
+	if err != nil {
+		log.Printf("Error marking quote as posted: %v", err)
+	}
 }
