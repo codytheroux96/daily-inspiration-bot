@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	// "os/signal"
 	// "syscall"
@@ -84,10 +83,8 @@ func main() {
 	if err != nil {
 		log.Printf("error getting quote: %v", err)
 	} else {
-		author := quote.Author
-		author = strings.TrimSuffix(author, ", type.fit")
 
-		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, author))
+		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
 		if err != nil {
 			log.Printf("error sending message: %v", err)
 		} else {
