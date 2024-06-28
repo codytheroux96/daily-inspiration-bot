@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/bwmarrin/discordgo"
-    "github.com/go-resty/resty/v2"
-    _ "github.com/go-sql-driver/mysql"
+	"github.com/go-resty/resty/v2"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
 
@@ -35,5 +35,21 @@ func main() {
 	channelID := os.Getenv("CHANNELID")
 	if channelID == "" {
 		log.Fatal("CHANNELID is not found in the environment")
+	}
+
+	dsn := os.Getenv("DSN")
+	if dsn == "" {
+		log.Fatal("DSN is not found in the environment")
+	}
+
+	db, err = sql.Open("mysql", dsn)
+	if err != nil {
+		log.Fatalf("error connecting to the database: %v", err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("error pinging the database: %v", err)
 	}
 }
