@@ -55,5 +55,48 @@ func main() {
 		log.Fatalf("error pinging the database: %v", err)
 	}
 
+	err = fetchAndStoreQuotes()
+    if err != nil {
+        log.Fatalf("Error fetching and storing quotes: %v", err)
+    }
+
+	dg, err := discordgo.New("Bot " + token)
+	if err != nil {
+        log.Fatalf("Error creating Discord session: %v", err)
+    }
+
+	dg.AddHandler(onReady())
+
+	err = dg.Open()
+    if err != nil {
+        log.Fatalf("Error opening connection: %v", err)
+    }
+
+    log.Println("Bot is now running. Press CTRL+C to exit.")
+
+
 	log.Println("Shutting down the application...")
+	dg.Close()
+}
+
+func fetchAndStoreQuotes() error {
+	return nil
+}
+
+func onReady() {
+
+}
+
+func dailyQuote() {
+
+}
+
+func getUnpostedQuote() (Quote, error) {
+	var quote Quote
+
+	return quote, nil
+}
+
+func markQuoteAsPosted(id int) {
+
 }
