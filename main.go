@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	// "os/signal"
 	// "syscall"
@@ -21,8 +20,8 @@ var db *sql.DB
 
 type Quote struct {
 	ID     int
-	Text   string `json:"text"`
-	Author string `json:"author"`
+	Text   string `json:"q"`
+	Author string `json:"a"`
 	Posted bool   `json:"posted"`
 }
 
@@ -84,10 +83,7 @@ func main() {
 	if err != nil {
 		log.Printf("error getting quote: %v", err)
 	} else {
-		author := quote.Author
-		author = strings.TrimSuffix(author, ", type.fit")
-
-		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, author))
+		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
 		if err != nil {
 			log.Printf("error sending message: %v", err)
 		} else {
@@ -100,7 +96,7 @@ func main() {
 
 func fetchAndStoreQuotes() error {
 	client := resty.New()
-	resp, err := client.R().Get("https://type.fit/api/quotes")
+	resp, err := client.R().Get("https://zenquotes.io/api/quotes")
 	if err != nil {
 		return err
 	}
