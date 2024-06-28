@@ -42,11 +42,6 @@ func main() {
 		log.Fatal("TOKEN is not found in the environment")
 	}
 
-	// channelID := os.Getenv("CHANNELID")
-	// if channelID == "" {
-	// 	log.Fatal("CHANNELID is not found in the environment")
-	// }
-
 	dsn := os.Getenv("DSN")
 	if dsn == "" {
 		log.Fatal("DSN is not found in the environment")
@@ -145,6 +140,7 @@ func dailyQuote(s *discordgo.Session) {
 		}
 
 		_, err = s.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
+		log.Println("message posted!")
 		if err != nil {
 			log.Printf("error sending message: %v", err)
 			continue
