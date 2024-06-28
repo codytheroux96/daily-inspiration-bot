@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -67,21 +68,26 @@ func main() {
 		log.Fatalf("Error creating Discord session: %v", err)
 	}
 
-	dg.AddHandler(onReady())
-
 	err = dg.Open()
 	if err != nil {
 		log.Fatalf("Error opening connection: %v", err)
 	}
+	defer dg.Close()
 
 	log.Println("Bot is now running. Press CTRL+C to exit.")
 
-	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
+	quote, err := getUnpostedQuote()
+	if err != nil {
+		log.Printf("error getting quote: %v", err)
+	} else {
+		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
+		if err != nil {
+			log.Printf("error sending message: %v", err)
+		} else {
+			markQuoteAsPosted(quote.ID)
+		}
+	}
 
-	log.Println("Shutting down the application...")
-	dg.Close()
 }
 
 func fetchAndStoreQuotes() error {
