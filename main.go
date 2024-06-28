@@ -95,14 +95,6 @@ func fetchAndStoreQuotes() error {
 	return nil
 }
 
-func onReady() {
-
-}
-
-func dailyQuote() {
-
-}
-
 func getUnpostedQuote() (Quote, error) {
 	var quote Quote
 
