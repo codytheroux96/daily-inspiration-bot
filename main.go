@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-resty/resty/v2"
@@ -74,6 +76,9 @@ func main() {
 
     log.Println("Bot is now running. Press CTRL+C to exit.")
 
+	sc := make(chan os.Signal, 1)
+    signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+    <-sc
 
 	log.Println("Shutting down the application...")
 	dg.Close()
