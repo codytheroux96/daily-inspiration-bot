@@ -58,27 +58,27 @@ func main() {
 	}
 
 	err = fetchAndStoreQuotes()
-    if err != nil {
-        log.Fatalf("Error fetching and storing quotes: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("Error fetching and storing quotes: %v", err)
+	}
 
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
-        log.Fatalf("Error creating Discord session: %v", err)
-    }
+		log.Fatalf("Error creating Discord session: %v", err)
+	}
 
 	dg.AddHandler(onReady())
 
 	err = dg.Open()
-    if err != nil {
-        log.Fatalf("Error opening connection: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("Error opening connection: %v", err)
+	}
 
-    log.Println("Bot is now running. Press CTRL+C to exit.")
+	log.Println("Bot is now running. Press CTRL+C to exit.")
 
 	sc := make(chan os.Signal, 1)
-    signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-    <-sc
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
 
 	log.Println("Shutting down the application...")
 	dg.Close()
