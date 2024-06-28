@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	// "os/signal"
-	// "syscall"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-resty/resty/v2"
@@ -16,7 +16,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var db *sql.DB
+var (
+	db *sql.DB
+)
 
 type Quote struct {
 	ID     int
@@ -40,10 +42,10 @@ func main() {
 		log.Fatal("TOKEN is not found in the environment")
 	}
 
-	channelID := os.Getenv("CHANNELID")
-	if channelID == "" {
-		log.Fatal("CHANNELID is not found in the environment")
-	}
+	// channelID := os.Getenv("CHANNELID")
+	// if channelID == "" {
+	// 	log.Fatal("CHANNELID is not found in the environment")
+	// }
 
 	dsn := os.Getenv("DSN")
 	if dsn == "" {
@@ -71,28 +73,21 @@ func main() {
 		log.Fatalf("Error creating Discord session: %v", err)
 	}
 
+	dg.AddHandler(onReady)
+
 	err = dg.Open()
 	if err != nil {
 		log.Fatalf("Error opening connection: %v", err)
 	}
-	defer dg.Close()
 
 	log.Println("Bot is now running. Press CTRL+C to exit.")
 
-	quote, err := getUnpostedQuote()
-	if err != nil {
-		log.Printf("error getting quote: %v", err)
-	} else {
-
-		_, err = dg.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
-		if err != nil {
-			log.Printf("error sending message: %v", err)
-		} else {
-			markQuoteAsPosted(quote.ID)
-		}
-	}
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
+	<-sc
 
 	log.Println("Shutting down the application...")
+	dg.Close()
 }
 
 func fetchAndStoreQuotes() error {
@@ -116,6 +111,49 @@ func fetchAndStoreQuotes() error {
 	}
 
 	return nil
+}
+
+func onReady(s *discordgo.Session, event *discordgo.Ready) {
+	log.Println("Bot is ready")
+	go dailyQuote(s)
+}
+
+func dailyQuote(s *discordgo.Session) {
+	channelID := os.Getenv("CHANNELID")
+	if channelID == "" {
+		log.Fatal("CHANNELID is not found in the environment")
+	}
+
+	for {
+		loc, err := time.LoadLocation("America/New_York")
+		if err != nil {
+			log.Printf("error loading location: %v", err)
+			return
+		}
+		now := time.Now().In(loc)
+
+		next := time.Date(now.Year(), now.Month(), now.Day(), 8, 0, 0, 0, loc)
+		if next.Before(now) {
+			next = next.Add(24 * time.Hour)
+		}
+		time.Sleep(time.Until(next))
+
+		quote, err := getUnpostedQuote()
+		if err != nil {
+			log.Printf("error getting quote: %v", err)
+			continue
+		}
+
+		_, err = s.ChannelMessageSend(channelID, fmt.Sprintf("\"%s\" - %s", quote.Text, quote.Author))
+		if err != nil {
+			log.Printf("error sending message: %v", err)
+			continue
+		}
+
+		markQuoteAsPosted(quote.ID)
+
+		time.Sleep(24 * time.Hour)
+	}
 }
 
 func getUnpostedQuote() (Quote, error) {
