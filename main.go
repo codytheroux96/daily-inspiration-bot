@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
+	// "os/signal"
+	// "syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/go-resty/resty/v2"
