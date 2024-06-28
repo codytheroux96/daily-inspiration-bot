@@ -5,6 +5,9 @@ import (
 	"log"
 	"os"
 
+	"github.com/bwmarrin/discordgo"
+    "github.com/go-resty/resty/v2"
+    _ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
 
