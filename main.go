@@ -19,6 +19,8 @@ type Quote struct {
 }
 
 func main() {
+	log.Println("Starting up the application...")
+
 	var db *sql.DB
 	var err error
 
@@ -52,4 +54,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("error pinging the database: %v", err)
 	}
+
+	log.Println("Shutting down the application...")
 }
