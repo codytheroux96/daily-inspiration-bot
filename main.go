@@ -88,6 +88,7 @@ func main() {
 		}
 	}
 
+	log.Println("Shutting down the application...")
 }
 
 func fetchAndStoreQuotes() error {
