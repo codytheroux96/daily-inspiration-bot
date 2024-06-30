@@ -1,7 +1,7 @@
 app = "daily-inspiration-bot"
 
 [build]
-  builder = "heroku/buildpacks:20"
+  builder = "heroku/buildpacks:24"
 
 [[services]]
   internal_port = 8080
