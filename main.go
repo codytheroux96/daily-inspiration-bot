@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -87,6 +88,7 @@ func main() {
 
 func fetchAndStoreQuotes() error {
 	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
 	resp, err := client.R().Get("https://zenquotes.io/api/quotes")
 	if err != nil {
 		return err
