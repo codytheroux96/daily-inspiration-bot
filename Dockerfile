@@ -9,6 +9,9 @@ RUN go build -v -o /run-app .
 
 FROM debian:bookworm
 
+# Update CA certificates
+RUN apt-get update && apt-get install -y ca-certificates && update-ca-certificates
+
 # Copy the .env file into the image
 COPY .env /usr/src/app/.env
 
