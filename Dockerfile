@@ -10,7 +10,7 @@ RUN go build -v -o /run-app .
 FROM debian:bookworm
 
 # Copy the .env file into the image
-COPY .env /usr/src/app/.env
+COPY .env /usr/src/app
 
 # Copy the binary from the builder stage
 COPY --from=builder /run-app /usr/local/bin/
