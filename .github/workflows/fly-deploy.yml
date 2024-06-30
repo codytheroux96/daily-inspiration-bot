@@ -11,6 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Create .env file
+      run: |
+          echo "TOKEN=${{ secrets.TOKEN }}" >> .env
+          echo "CHANNELID=${{ secrets.CHANNELID }}" >> .env
+          echo "DSN=${{ secrets.DSN }}" >> .env
       - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
