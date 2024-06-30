@@ -1,0 +1,20 @@
+# fly.toml app configuration file generated for daily-inspiration-bot on 2024-06-30T10:49:50-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'daily-inspiration-bot'
+primary_region = 'iad'
+
+[build]
+  [build.args]
+    GO_VERSION = '1.22.0'
+
+[env]
+  PORT = '8080'
+
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
