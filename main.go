@@ -131,7 +131,6 @@ func dailyQuote(s *discordgo.Session) {
 		if next.Before(now) {
 			next = next.Add(24 * time.Hour)
 		}
-		time.Sleep(time.Until(next))
 
 		quote, err := getUnpostedQuote()
 		if err != nil {
@@ -148,7 +147,7 @@ func dailyQuote(s *discordgo.Session) {
 
 		markQuoteAsPosted(quote.ID)
 
-		time.Sleep(24 * time.Hour)
+		time.Sleep(time.Until(next))
 	}
 }
 
